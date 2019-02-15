@@ -1,0 +1,8 @@
+package: github.com/phil-inc/pweb
+import:
+- package: github.com/dgrijalva/jwt-go
+  version: v3.2.0
+- package: github.com/julienschmidt/httprouter
+  version: v1.2.0
+- package: github.com/justinas/alice
+- package: github.com/phil-inc/plog

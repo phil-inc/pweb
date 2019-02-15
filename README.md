@@ -1,2 +1,2 @@
 # pweb
-Micro web-framework in Go
+Micro web-framework in go
