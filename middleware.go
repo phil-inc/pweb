@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"expvar"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -14,6 +15,7 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/phil-inc/plog/logging"
+	"github.com/zserge/metric"
 )
 
 type body struct {
@@ -238,6 +240,8 @@ func RecoverHandler(ctx context.Context, e ErrorHandler) func(http.Handler) http
 }
 
 // LoggingHandler middleware to log request/response
+// since this logs every request/response be aware that depending on the volume it may store
+// lot of log data
 func LoggingHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		//start time
@@ -248,10 +252,36 @@ func LoggingHandler(next http.Handler) http.Handler {
 		t2 := time.Now()
 		//log it!
 		diff := t2.Sub(t1)
-		if diff.Seconds() > 2.0 {
-			//only log response time if response time is more than 2s
-			logger.Printf("Reponse Time:[%f][%q]- %s", diff.Seconds(), r.Method, r.URL.String())
+		//only log response time if response time is more than 2s
+		logger.Printf("Reponse Time:[%f][%q]- %s", diff.Seconds(), r.Method, r.URL.String())
+	}
+
+	return http.HandlerFunc(fn)
+}
+
+//MetricsHandler collects the different http metrics using go expvar package
+func MetricsHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		//start time
+		t1 := time.Now()
+		//invoke next handler on a chain
+		next.ServeHTTP(w, r)
+		//end time
+		t2 := time.Now()
+		//log it!
+		diff := t2.Sub(t1)
+
+		//HTTP request metrics counters
+		expvar.Get("http:request:count").(metric.Metric).Add(1)
+		m := strings.ToLower(r.Method)
+		k := fmt.Sprintf("http:%s:count", m)
+		v := expvar.Get(k)
+		if v != nil {
+			v.(metric.Metric).Add(1)
 		}
+
+		//response time histogram
+		expvar.Get("http:response:time").(metric.Metric).Add(float64(diff.Seconds() / float64(time.Second)))
 	}
 
 	return http.HandlerFunc(fn)
@@ -278,6 +308,8 @@ func WriteJSON(w http.ResponseWriter, resource interface{}) {
 
 // WriteError writes error response
 func WriteError(w http.ResponseWriter, err *Error) {
+	expvar.Get("http:error:count").(metric.Metric).Add(1)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(err.Status)
 	json.NewEncoder(w).Encode(Errors{[]*Error{err}})

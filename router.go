@@ -3,6 +3,7 @@ package pweb
 import (
 	"context"
 	"errors"
+	"expvar"
 	"net/http"
 	"strings"
 
@@ -10,10 +11,26 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
+	"github.com/zserge/metric"
 )
 
 type sessionUser struct {
 	Key string
+}
+
+//initialize http metrics
+func init() {
+	// A counter that keeps different HTTP request counts for 7 days, 24 hours, 1 hour, 15 minutes, 5 minutes of time with different precision:
+
+	expvar.Publish("http:get:count", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+	expvar.Publish("http:post:count", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+	expvar.Publish("http:put:count", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+	expvar.Publish("http:delete:count", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+	expvar.Publish("http:request:count", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+	expvar.Publish("http:error:count", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+
+	//response time
+	expvar.Publish("http:response:time", metric.NewHistogram("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
 }
 
 // SessionUserKey key for context
@@ -35,6 +52,15 @@ func NewPhilRouter(ctx context.Context) *PhilRouter {
 //SetAllowedDomains update the list of allowed domains for CORS
 func (s *PhilRouter) SetAllowedDomains(domains string) {
 	s.AllowedDomains = domains
+}
+
+//EnableHTTPMetrics enable http metrics collections. In order for these 2 work and collect pweb http metrics
+//pweb.MetricsHandler should be added in the handler chain
+func (s *PhilRouter) EnableHTTPMetrics() {
+	//Expose raw metrics data
+	s.Get("/debug/vars", expvar.Handler())
+	//Expose opinionated web UI for metrics
+	s.Get("/debug/metrics", metric.Handler(metric.Exposed))
 }
 
 func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
