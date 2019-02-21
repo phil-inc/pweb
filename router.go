@@ -70,8 +70,8 @@ func init() {
 	expvar.Publish("http:request:count", metric.NewCounter(frames...))
 	expvar.Publish("http:error:count", metric.NewCounter(frames...))
 
-	//rate count per minute
-	expvar.Publish("http:rate:count", metric.NewCounter(frames...))
+	//request rate per minute
+	expvar.Publish("http:request:rate", metric.NewCounter(frames...))
 
 	//response time
 	expvar.Publish("http:response:time", metric.NewHistogram("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
