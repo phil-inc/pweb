@@ -33,7 +33,9 @@ func init() {
 	numcgocall := "system:go:numcgocall"
 	numcpu := "system:go:numcpu"
 	alloc := "system:go:alloc"
+	heapalloc := "system:go:heapalloc"
 	alloctotal := "system:go:alloctotal"
+	numgc := "system:go:numgc"
 
 	frames := []string{"5m1m", "15m1m", "1h1m", "24h1h", "7d1d"}
 
@@ -41,17 +43,21 @@ func init() {
 	expvar.Publish(numcgocall, metric.NewGauge(frames...))
 	expvar.Publish(numcpu, metric.NewGauge(frames...))
 	expvar.Publish(alloc, metric.NewGauge(frames...))
+	expvar.Publish(heapalloc, metric.NewGauge(frames...))
 	expvar.Publish(alloctotal, metric.NewGauge(frames...))
+	expvar.Publish(numgc, metric.NewGauge(frames...))
 	go func() {
-		for range time.Tick(1 * time.Minute) {
+		for range time.Tick(5 * time.Minute) {
 			m := &runtime.MemStats{}
 			runtime.ReadMemStats(m)
 
 			expvar.Get(numgoroutine).(metric.Metric).Add(float64(runtime.NumGoroutine()))
 			expvar.Get(numcgocall).(metric.Metric).Add(float64(runtime.NumCgoCall()))
 			expvar.Get(numcpu).(metric.Metric).Add(float64(runtime.NumCPU()))
-			expvar.Get(alloc).(metric.Metric).Add(float64(m.Alloc) / 1000000)
-			expvar.Get(alloctotal).(metric.Metric).Add(float64(m.TotalAlloc) / 1000000)
+			expvar.Get(alloc).(metric.Metric).Add(float64(bToMB(m.Alloc)))
+			expvar.Get(heapalloc).(metric.Metric).Add(float64(bToMB(m.HeapAlloc)))
+			expvar.Get(alloctotal).(metric.Metric).Add(float64(bToMB(m.TotalAlloc)))
+			expvar.Get(numgc).(metric.Metric).Add(float64(m.NumGC))
 		}
 	}()
 
@@ -64,10 +70,14 @@ func init() {
 	expvar.Publish("http:error:count", metric.NewCounter(frames...))
 
 	//request rate per minute
-	expvar.Publish("http:request:rate", metric.NewCounter(frames...))
+	expvar.Publish("http:request:rate:min", metric.NewCounter(frames...))
 
 	//response time
-	expvar.Publish("http:response:time", metric.NewGauge("5m1s", "15m1s", "1h1m", "24h1h", "7d1d"))
+	expvar.Publish("http:response:time:sec", metric.NewGauge("5m1s", "15m1s", "1h1m", "24h1h", "7d1d"))
+}
+
+func bToMB(b uint64) uint64 {
+	return b / 1024 / 1024
 }
 
 // SessionUserKey key for context
