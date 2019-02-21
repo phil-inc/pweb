@@ -281,7 +281,7 @@ func MetricsHandler(next http.Handler) http.Handler {
 		}
 
 		//response time histogram
-		expvar.Get("http:response:time").(metric.Metric).Add(float64(diff.Seconds() / float64(time.Second)))
+		expvar.Get("http:response:time").(metric.Metric).Add(diff.Seconds())
 
 		//collect rate count
 		counter.Incr(1)

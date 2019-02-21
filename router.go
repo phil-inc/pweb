@@ -28,7 +28,7 @@ func init() {
 
 	counter = ratecounter.NewRateCounter(1 * time.Minute)
 
-	expvar.Publish("system:uptime", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1m", "5m1m"))
+	expvar.Publish("system:uptime", metric.NewCounter("5m1m", "15m1m", "1h1m", "24h1h", "7d1d"))
 	go func() {
 		for range time.Tick(1 * time.Minute) {
 			expvar.Get("system:uptime").(metric.Metric).Add(float64(60))
@@ -42,7 +42,7 @@ func init() {
 	alloc := "system:go:alloc"
 	alloctotal := "system:go:alloctotal"
 
-	frames := []string{"7d1d", "24h1h", "1h1m", "15m1m", "5m1m"}
+	frames := []string{"5m1m", "15m1m", "1h1m", "24h1h", "7d1d"}
 
 	expvar.Publish(numgoroutine, metric.NewGauge(frames...))
 	expvar.Publish(numcgocall, metric.NewGauge(frames...))
@@ -74,7 +74,7 @@ func init() {
 	expvar.Publish("http:request:rate", metric.NewCounter(frames...))
 
 	//response time
-	expvar.Publish("http:response:time", metric.NewHistogram("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+	expvar.Publish("http:response:time", metric.NewGauge("5m1s", "15m1s", "1h1m", "24h1h", "7d1d"))
 }
 
 // SessionUserKey key for context
