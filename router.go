@@ -28,7 +28,7 @@ func init() {
 
 	counter = ratecounter.NewRateCounter(1 * time.Minute)
 
-	expvar.Publish("system:uptime", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1s", "5m1s"))
+	expvar.Publish("system:uptime", metric.NewCounter("7d1d", "24h1h", "1h1m", "15m1m", "5m1m"))
 	go func() {
 		for range time.Tick(1 * time.Minute) {
 			expvar.Get("system:uptime").(metric.Metric).Add(float64(60))
