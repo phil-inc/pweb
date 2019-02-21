@@ -28,13 +28,6 @@ func init() {
 
 	counter = ratecounter.NewRateCounter(1 * time.Minute)
 
-	expvar.Publish("system:uptime", metric.NewCounter("5m1m", "15m1m", "1h1m", "24h1h", "7d1d"))
-	go func() {
-		for range time.Tick(1 * time.Minute) {
-			expvar.Get("system:uptime").(metric.Metric).Add(float64(60))
-		}
-	}()
-
 	// Some Go internal metrics
 	numgoroutine := "system:go:numgoroutine"
 	numcgocall := "system:go:numcgocall"
@@ -50,7 +43,7 @@ func init() {
 	expvar.Publish(alloc, metric.NewGauge(frames...))
 	expvar.Publish(alloctotal, metric.NewGauge(frames...))
 	go func() {
-		for range time.Tick(5 * time.Minute) {
+		for range time.Tick(1 * time.Minute) {
 			m := &runtime.MemStats{}
 			runtime.ReadMemStats(m)
 
