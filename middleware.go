@@ -285,7 +285,6 @@ func MetricsHandler(next http.Handler) http.Handler {
 
 		//collect rate count
 		counter.Incr(1)
-		expvar.Get("http:request:rate:min").(metric.Metric).Add(float64(counter.Rate()))
 	}
 
 	return http.HandlerFunc(fn)

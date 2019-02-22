@@ -70,10 +70,16 @@ func init() {
 	expvar.Publish("http:error:count", metric.NewCounter(frames...))
 
 	//request rate per minute
-	expvar.Publish("http:request:rate:min", metric.NewCounter(frames...))
+	reqRate := "http:request:rate:min"
+	expvar.Publish(reqRate, metric.NewCounter(frames...))
+	go func() {
+		for range time.Tick(1 * time.Minute) {
+			expvar.Get(reqRate).(metric.Metric).Add(float64(counter.Rate()))
+		}
+	}()
 
 	//response time
-	expvar.Publish("http:response:time:sec", metric.NewGauge("5m1s", "15m1s", "1h1m", "24h1h", "7d1d"))
+	expvar.Publish("http:response:time:sec", metric.NewGauge("5m1m", "15m1m", "1h5m", "24h1h", "7d1d"))
 }
 
 func bToMB(b uint64) uint64 {
