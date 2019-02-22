@@ -71,7 +71,7 @@ func init() {
 
 	//request rate per minute
 	reqRate := "http:request:rate:min"
-	expvar.Publish(reqRate, metric.NewCounter(frames...))
+	expvar.Publish(reqRate, metric.NewGauge(frames...))
 	go func() {
 		for range time.Tick(1 * time.Minute) {
 			expvar.Get(reqRate).(metric.Metric).Add(float64(counter.Rate()))
