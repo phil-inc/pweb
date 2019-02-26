@@ -268,8 +268,10 @@ func MetricsHandler(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 		//end time
 		t2 := time.Now()
-		//log it!
+
 		diff := t2.Sub(t1)
+		//response time histogram
+		expvar.Get("http:response:time:sec").(metric.Metric).Add(diff.Seconds())
 
 		//HTTP request metrics counters
 		expvar.Get("http:request:count").(metric.Metric).Add(1)
@@ -279,9 +281,6 @@ func MetricsHandler(next http.Handler) http.Handler {
 		if v != nil {
 			v.(metric.Metric).Add(1)
 		}
-
-		//response time histogram
-		expvar.Get("http:response:time:sec").(metric.Metric).Add(diff.Seconds())
 
 		//collect rate count
 		counter.Incr(1)
@@ -306,7 +305,18 @@ func ContentTypeHandler(next http.Handler) http.Handler {
 // WriteJSON writes resource to the output stream as JSON data.
 func WriteJSON(w http.ResponseWriter, resource interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resource)
+	t1 := time.Now()
+	err := json.NewEncoder(w).Encode(resource)
+	if err != nil {
+		logger.ErrorPrintf("Error writing JSON: %s", err)
+		WriteError(w, ErrInternalServer)
+		return
+	}
+	//end time
+	t2 := time.Now()
+
+	diff := t2.Sub(t1)
+	expvar.Get("http:json-parse:time:sec").(metric.Metric).Add(diff.Seconds())
 }
 
 // WriteError writes error response

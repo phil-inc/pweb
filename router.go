@@ -80,6 +80,9 @@ func init() {
 
 	//response time
 	expvar.Publish("http:response:time:sec", metric.NewGauge("5m1m", "15m1m", "1h5m", "24h1h", "7d1d"))
+
+	//JSON parsing time
+	expvar.Publish("http:json-parse:time:sec", metric.NewGauge("5m1m", "15m1m", "1h5m", "24h1h", "7d1d"))
 }
 
 func bToMB(b uint64) uint64 {
