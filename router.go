@@ -122,6 +122,7 @@ func (s *PhilRouter) EnableGzip(level int) {
 	c, err := gziphandler.NewGzipLevelHandler(level)
 	if err == nil {
 		compressor = c
+		s.gzip = true
 	}
 }
 
