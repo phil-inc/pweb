@@ -1,14 +1,18 @@
-hash: 05a22e42a545d8fd8b52a9b7e496c0d81578d4bb4003913ad9b3d162c0511cfe
-updated: 2019-02-15T13:09:43.729638-08:00
+hash: 91614d0d65f30d498ab92e2f76b01c7532674b29251188e7ec6fb192027bf50e
+updated: 2019-02-20T16:21:10.903176-08:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: github.com/julienschmidt/httprouter
   version: 348b672cd90d8190f8240323e372ecd1e66b59dc
 - name: github.com/justinas/alice
-  version: 1051eaf52fcafdd87ead59d28b065f1fcb8274ec
+  version: 03f45bd4b7dad4734bc4620e46a35789349abb20
+- name: github.com/paulbellamy/ratecounter
+  version: 524851a93235ac051e3540563ed7909357fe24ab
 - name: github.com/phil-inc/plog
   version: 104ca8d1669eef0c4122ff23dd00e13995cdb992
   subpackages:
   - logging
+- name: github.com/zserge/metric
+  version: 0941fa223948f2050fcc7d13ee7369327faf6c11
 testImports: []

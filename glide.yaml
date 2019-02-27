@@ -6,3 +6,7 @@ import:
   version: v1.2.0
 - package: github.com/justinas/alice
 - package: github.com/phil-inc/plog
+- package: github.com/zserge/metric
+  version: v0.1.0
+- package: github.com/paulbellamy/ratecounter
+  version: v0.2.0
