@@ -239,6 +239,20 @@ func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, res)
 }
 
+// ImageResponse - response which has the header and byte data for an image.
+type ImageResponse struct {
+	ImageType string // set to '*' for variable image types.
+	ImageData []byte
+}
+
+// Write - sets the "Content-Type" header and returns the image data.
+func (res ImageResponse) Write(w http.ResponseWriter, r *http.Request) {
+	contentType := fmt.Sprintf("image/%s", res.ImageType)
+
+	w.Header().Set("Content-Type", "image/*")
+	w.Write(res.imageData)
+}
+
 // DataResponse creates new API data response using the resource
 func DataResponse(data interface{}) APIResponse {
 	return APIResponse{Error: "", Status: "OK", Data: data}
@@ -252,6 +266,11 @@ func StringErrorResponse(err string) APIResponse {
 //ErrorResponse constructs error response from the API
 func ErrorResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil}
+}
+
+// ImageResponse constructs an image response from a content type and image data.
+func ImageResponse(imageType string, data []byte) ImageResponse {
+	return ImageResponse{ImageType: imagetype, ImageData: data}
 }
 
 // RequestBody returns the request body
