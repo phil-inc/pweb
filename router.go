@@ -270,8 +270,8 @@ func ErrorResponse(err error) APIResponse {
 }
 
 // ImageResponse constructs an image response from a content type and image data.
-func ImageResponse(imageType string, data []byte) ImageResponse {
-	return ImageDataResponse{ImageType: imagetype, ImageData: data}
+func ImageResponse(imageType string, data []byte) ImageDataResponse {
+	return ImageDataResponse{ImageType: imageType, ImageData: data}
 }
 
 // RequestBody returns the request body
