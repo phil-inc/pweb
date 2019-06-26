@@ -250,7 +250,7 @@ type ImageDataResponse struct {
 func (res ImageDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 	contentType := fmt.Sprintf("image/%s", res.ImageType)
 
-	w.Header().Set("Content-Type", "image/*")
+	w.Header().Set("Content-Type", contentType)
 	w.Write(res.ImageData)
 }
 
