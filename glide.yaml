@@ -10,3 +10,5 @@ import:
   version: v0.1.0
 - package: github.com/paulbellamy/ratecounter
   version: v0.2.0
+- package: github.com/NYTimes/gziphandler
+  version: v1.1.1
