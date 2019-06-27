@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"expvar"
+	"fmt"
 	"net/http"
 	"runtime"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"log"
 
+	"github.com/NYTimes/gziphandler"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
 	"github.com/paulbellamy/ratecounter"
@@ -92,22 +94,37 @@ func bToMB(b uint64) uint64 {
 // SessionUserKey key for context
 var SessionUserKey = sessionUser{Key: "SessionUser"}
 
+var compressor func(http.Handler) http.Handler
+
 // PhilRouter wraps httprouter, which is non-compatible with http.Handler to make it
 // compatible by implementing http.Handler into a httprouter.Handler function.
 type PhilRouter struct {
 	Ctx            context.Context
 	AllowedDomains string
+	gzip           bool
 	r              *httprouter.Router
 }
 
 // NewPhilRouter returns new PhilRouter which wraps the httprouter
 func NewPhilRouter(ctx context.Context) *PhilRouter {
-	return &PhilRouter{ctx, "*", httprouter.New()}
+	return &PhilRouter{ctx, "*", false, httprouter.New()}
 }
 
 //SetAllowedDomains update the list of allowed domains for CORS
 func (s *PhilRouter) SetAllowedDomains(domains string) {
 	s.AllowedDomains = domains
+}
+
+//EnableGzip enable gzip compression for given level in the range from no compression to best
+//  NoCompression      = 0
+//	BestSpeed          = 1
+//	BestCompression    = 9
+func (s *PhilRouter) EnableGzip(level int) {
+	c, err := gziphandler.NewGzipLevelHandler(level)
+	if err == nil {
+		compressor = c
+		s.gzip = true
+	}
 }
 
 //EnableHTTPMetrics enable http metrics collections. In order for these 2 work and collect pweb http metrics
@@ -149,7 +166,11 @@ func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 // Get wraps httprouter's GET function
 func (s *PhilRouter) Get(path string, handler http.Handler) {
-	s.r.GET(path, wrapHandler(s.Ctx, handler))
+	if compressor != nil && s.gzip {
+		s.r.GET(path, wrapHandler(s.Ctx, compressor(handler)))
+	} else {
+		s.r.GET(path, wrapHandler(s.Ctx, handler))
+	}
 }
 
 // Post wraps httprouter's POST function
@@ -239,6 +260,20 @@ func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, res)
 }
 
+// ImageDataResponse - response which has the header and byte data for an image.
+type ImageDataResponse struct {
+	ImageType string // set to '*' for variable image types.
+	ImageData []byte
+}
+
+// Write - sets the "Content-Type" header and returns the image data.
+func (res ImageDataResponse) Write(w http.ResponseWriter, r *http.Request) {
+	contentType := fmt.Sprintf("image/%s", res.ImageType)
+
+	w.Header().Set("Content-Type", contentType)
+	w.Write(res.ImageData)
+}
+
 // DataResponse creates new API data response using the resource
 func DataResponse(data interface{}) APIResponse {
 	return APIResponse{Error: "", Status: "OK", Data: data}
@@ -252,6 +287,11 @@ func StringErrorResponse(err string) APIResponse {
 //ErrorResponse constructs error response from the API
 func ErrorResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil}
+}
+
+// ImageResponse constructs an image response from a content type and image data.
+func ImageResponse(imageType string, data []byte) ImageDataResponse {
+	return ImageDataResponse{ImageType: imageType, ImageData: data}
 }
 
 // RequestBody returns the request body
