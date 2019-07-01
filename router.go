@@ -276,11 +276,11 @@ func (res ImageDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 
 // PDFDataResponse - response which has the header and byte data for a PDF.
 type PDFDataResponse struct {
-	ContentDisposition string // default (empty string) will return as attachments
+	ContentDisposition string // PDFResponse() sets a default for this.
 	PDFData            []byte
 }
 
-// Write - sets the "Content-Type" header and returns the image data.
+// Write - sets the "Content-Disposition" header and returns the PDF data.
 func (res PDFDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/pdf")
 	w.Header().Set("Content-Disposition", res.ContentDisposition)
@@ -307,7 +307,7 @@ func ImageResponse(imageType string, data []byte) ImageDataResponse {
 	return ImageDataResponse{ImageType: imageType, ImageData: data}
 }
 
-// PDFResponse constructs an image response from a content type and image data.
+// PDFResponse constructs a PDF response from a content-disposition and PDF data.
 func PDFResponse(contentDisposition string, data []byte) PDFDataResponse {
 	if contentDisposition == "" {
 		contentDisposition = "attachment; filename=filename.pdf" // default to sending as attachment
