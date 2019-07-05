@@ -274,6 +274,19 @@ func (res ImageDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 	w.Write(res.ImageData)
 }
 
+// PDFDataResponse - response which has the header and byte data for a PDF.
+type PDFDataResponse struct {
+	ContentDisposition string // PDFResponse() sets a default for this.
+	PDFData            []byte
+}
+
+// Write - sets the "Content-Disposition" header and returns the PDF data.
+func (res PDFDataResponse) Write(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", res.ContentDisposition)
+	w.Write(res.PDFData)
+}
+
 // DataResponse creates new API data response using the resource
 func DataResponse(data interface{}) APIResponse {
 	return APIResponse{Error: "", Status: "OK", Data: data}
@@ -292,6 +305,15 @@ func ErrorResponse(err error) APIResponse {
 // ImageResponse constructs an image response from a content type and image data.
 func ImageResponse(imageType string, data []byte) ImageDataResponse {
 	return ImageDataResponse{ImageType: imageType, ImageData: data}
+}
+
+// PDFResponse constructs a PDF response from a content-disposition and PDF data.
+func PDFResponse(contentDisposition string, data []byte) PDFDataResponse {
+	if contentDisposition == "" {
+		contentDisposition = "attachment; filename=filename.pdf" // default to sending as attachment
+	}
+
+	return PDFDataResponse{ContentDisposition: contentDisposition, PDFData: data}
 }
 
 // RequestBody returns the request body
