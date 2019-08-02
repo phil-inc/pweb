@@ -1,10 +1,12 @@
 package pweb
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"expvar"
 	"fmt"
+	"net"
 	"net/http"
 	"runtime"
 	"strings"
@@ -153,7 +155,7 @@ func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With, X-App-Source, X-Request-Id, X-User-Id, Strict-Transport-Security")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With, X-App-Source, X-Request-Id, X-User-Id, Strict-Transport-Security, X-Forwarded-For, X-Real-Ip")
 	if req.Method == "OPTIONS" {
 		w.(http.Flusher).Flush()
 	}
@@ -362,4 +364,88 @@ func Authorize(w http.ResponseWriter, r *http.Request) {
 	if sid != uid {
 		WriteError(w, Forbidden)
 	}
+}
+
+//GetRemoteIP returns the IP address of the client sending the request. It walks backwards through the number of ip
+//addresses by the number of proxies you have in your environment to the internet. That way, you will be adverse to
+//any mucking with the X-Forwarded-For header by the client
+func GetRemoteIP(r *http.Request) string {
+	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
+		addresses := strings.Split(r.Header.Get(h), ",")
+		// march from right to left until we get a public address
+		// that will be the address right before our proxy.
+		for i := len(addresses) -1 ; i >= 0; i-- {
+			ip := strings.TrimSpace(addresses[i])
+			// header can contain spaces too, strip those out.
+			realIP := net.ParseIP(ip)
+			if !realIP.IsGlobalUnicast() || isPrivateSubnet(realIP) {
+				// bad address, go to next
+				continue
+			}
+
+			return ip
+		}
+	}
+
+	return ""
+}
+
+//ipRange - a structure that holds the start and end of a range of ip addresses
+type ipRange struct {
+	start net.IP
+	end net.IP
+}
+
+// inRange - check to see if a given ip address is within a range given
+func inRange(r ipRange, ipAddress net.IP) bool {
+	// strcmp type byte comparison
+	if bytes.Compare(ipAddress, r.start) >= 0 && bytes.Compare(ipAddress, r.end) < 0 {
+		return true
+	}
+	return false
+}
+
+//IP ranges to filter out private sub-nets, as well as multi-cast address space, and localhost address space
+//Reference - https://whatismyipaddress.com/private-ip
+var privateRanges = []ipRange{
+	ipRange{
+		start: net.ParseIP("10.0.0.0"),
+		end:   net.ParseIP("10.255.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("100.64.0.0"),
+		end:   net.ParseIP("100.127.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("172.16.0.0"),
+		end:   net.ParseIP("172.31.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("192.0.0.0"),
+		end:   net.ParseIP("192.0.0.255"),
+	},
+	ipRange{
+		start: net.ParseIP("192.168.0.0"),
+		end:   net.ParseIP("192.168.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("198.18.0.0"),
+		end:   net.ParseIP("198.19.255.255"),
+	},
+}
+
+
+// isPrivateSubnet - check to see if this ip is in a private subnet
+func isPrivateSubnet(ipAddress net.IP) bool {
+	// my use case is only concerned with ipv4 atm
+	if ipCheck := ipAddress.To4(); ipCheck != nil {
+		// iterate over all our ranges
+		for _, r := range privateRanges {
+			// check if this ip is in a private range
+			if inRange(r, ipAddress){
+				return true
+			}
+		}
+	}
+	return false
 }
