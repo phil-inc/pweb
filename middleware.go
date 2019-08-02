@@ -239,26 +239,6 @@ func RecoverHandler(ctx context.Context, e ErrorHandler) func(http.Handler) http
 	return m
 }
 
-// LoggingHandler middleware to log request/response
-// since this logs every request/response be aware that depending on the volume it may store
-// lot of log data
-func LoggingHandler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		//start time
-		t1 := time.Now()
-		//invoke next handler on a chain
-		next.ServeHTTP(w, r)
-		//end time
-		t2 := time.Now()
-		//log it!
-		diff := t2.Sub(t1)
-		//only log response time if response time is more than 2s
-		logger.Printf("Reponse Time:[%f][%q]- %s", diff.Seconds(), r.Method, r.URL.String())
-	}
-
-	return http.HandlerFunc(fn)
-}
-
 //MetricsHandler collects the different http metrics using go expvar package
 func MetricsHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
