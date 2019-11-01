@@ -108,7 +108,7 @@ func JWTAuthWithCustomValidator(ctx context.Context, securityToken string, v Cus
 			// check JSON web token data
 			claims, err := checkJWT(w, r, v, securityToken)
 			if err != nil && err.Error() != "Token is expired" {
-				logger.ErrorPrintf("Invalid auth token: %v", err)
+				logger.ErrorPrintf("invalid token: %v", err)
 				WriteError(w, UnAuthorized)
 				return
 			}
@@ -320,14 +320,18 @@ func checkJWT(w http.ResponseWriter, r *http.Request, v CustomTokenValidator, se
 		return nil, err
 	}
 	if rawToken == "" {
-		return nil, errors.New("Invalid auth token")
+		return nil, errors.New("invalid token")
 	}
 
 	// Now parse the token
 	parsedToken, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
+		//don't except if signature is missing
+		if token.Signature == "" {
+			return nil, fmt.Errorf("invalid signature")
+		}
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("[ERROR] Invalid signing method: %s", token.Signature)
+			return nil, fmt.Errorf("invalid signing method: %s", token.Signature)
 		}
 		return []byte(securityToken), nil
 	})
@@ -338,7 +342,7 @@ func checkJWT(w http.ResponseWriter, r *http.Request, v CustomTokenValidator, se
 
 	// Check if the parsed token is valid...
 	if !parsedToken.Valid {
-		return nil, errors.New("Invalid auth token")
+		return nil, errors.New("invalid token")
 	}
 
 	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
@@ -347,14 +351,14 @@ func checkJWT(w http.ResponseWriter, r *http.Request, v CustomTokenValidator, se
 		if v != nil {
 			//give a chance to custom validator if it exists
 			if !v.IsValid(r, userID, rawToken, claims) {
-				return nil, errors.New("Invalid auth token")
+				return nil, errors.New("invalid token")
 			}
 		}
 
 		return claims, nil
 	}
 
-	return nil, errors.New("Invalid auth token")
+	return nil, errors.New("invalid token")
 }
 
 // extractAPIKeyFromAuthHeader extract Phil API Key from the header
