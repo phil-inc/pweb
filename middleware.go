@@ -325,10 +325,6 @@ func checkJWT(w http.ResponseWriter, r *http.Request, v CustomTokenValidator, se
 
 	// Now parse the token
 	parsedToken, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
-		//don't except if signature is missing
-		if token.Signature == "" {
-			return nil, fmt.Errorf("invalid signature")
-		}
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("invalid signing method: %s", token.Signature)
