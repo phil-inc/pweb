@@ -6,16 +6,15 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
+	"github.com/phil-inc/plog/logging"
 	"net"
 	"net/http"
 	"runtime"
 	"strings"
 	"time"
 
-	"log"
-
 	"github.com/NYTimes/gziphandler"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
 	"github.com/paulbellamy/ratecounter"
 	"github.com/zserge/metric"
@@ -26,6 +25,9 @@ type sessionUser struct {
 }
 
 var counter *ratecounter.RateCounter
+
+
+var rlogger = logging.GetContextLogger("router")
 
 //initialize http metrics
 func init() {
@@ -143,6 +145,7 @@ func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	origin := req.Header.Get("Origin")
 	if origin == "" {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		rlogger.Printf("[WARN] request without origin. METHOD: %s, PATH: %s", req.Method, req.RequestURI)
 	} else {
 		corsList := s.AllowedDomains
 		if strings.Contains(corsList, origin) {
@@ -257,7 +260,7 @@ type APIResponse struct {
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
-		log.Printf("[ERROR][API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		rlogger.ErrorPrintf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
