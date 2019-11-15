@@ -10,7 +10,7 @@ import (
 //Controller Phil controller
 type Controller struct {
 	ctx    context.Context
-	chain  alice.Chain
+	chain  *alice.Chain
 	router *PhilRouter
 }
 
@@ -48,11 +48,12 @@ func (c Controller) Delete(path string, body interface{}, f func(http.ResponseWr
 
 //Append append any middleware of type func(http.Handler) http.Handler at the controller level. This can be used by
 //controllers to attach middleware specific to controllers
-func (c Controller) Append(constructor alice.Constructor) alice.Chain {
-	return c.chain.Append(constructor)
+func (c Controller) Append(constructor alice.Constructor) {
+	ch := c.chain.Append(constructor)
+	c.chain = &ch
 }
 
 //NewController new controller object
 func NewController(ctx context.Context, c alice.Chain, r *PhilRouter) Controller {
-	return Controller{ctx: ctx, chain: c, router: r}
+	return Controller{ctx: ctx, chain: &c, router: r}
 }
