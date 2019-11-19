@@ -6,12 +6,13 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
-	"github.com/phil-inc/plog/logging"
 	"net"
 	"net/http"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/phil-inc/plog/logging"
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/dgrijalva/jwt-go"
@@ -25,7 +26,6 @@ type sessionUser struct {
 }
 
 var counter *ratecounter.RateCounter
-
 
 var rlogger = logging.GetContextLogger("router")
 
@@ -158,7 +158,7 @@ func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With, X-App-Source, X-Request-Id, X-User-Id, Strict-Transport-Security, X-Forwarded-For, X-Real-Ip")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With, X-App-Source, X-Request-Id, X-User-Id, Strict-Transport-Security, X-Forwarded-For, X-Real-Ip, Browser-User-Agent")
 	if req.Method == "OPTIONS" {
 		w.(http.Flusher).Flush()
 	}
@@ -377,7 +377,7 @@ func GetRemoteIP(r *http.Request) string {
 		addresses := strings.Split(r.Header.Get(h), ",")
 		// march from right to left until we get a public address
 		// that will be the address right before our proxy.
-		for i := len(addresses) -1 ; i >= 0; i-- {
+		for i := len(addresses) - 1; i >= 0; i-- {
 			ip := strings.TrimSpace(addresses[i])
 			// header can contain spaces too, strip those out.
 			realIP := net.ParseIP(ip)
@@ -396,7 +396,7 @@ func GetRemoteIP(r *http.Request) string {
 //ipRange - a structure that holds the start and end of a range of ip addresses
 type ipRange struct {
 	start net.IP
-	end net.IP
+	end   net.IP
 }
 
 // inRange - check to see if a given ip address is within a range given
@@ -437,7 +437,6 @@ var privateRanges = []ipRange{
 	},
 }
 
-
 // isPrivateSubnet - check to see if this ip is in a private subnet
 func isPrivateSubnet(ipAddress net.IP) bool {
 	// my use case is only concerned with ipv4 atm
@@ -445,7 +444,7 @@ func isPrivateSubnet(ipAddress net.IP) bool {
 		// iterate over all our ranges
 		for _, r := range privateRanges {
 			// check if this ip is in a private range
-			if inRange(r, ipAddress){
+			if inRange(r, ipAddress) {
 				return true
 			}
 		}
