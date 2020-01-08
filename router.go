@@ -145,7 +145,8 @@ func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	origin := req.Header.Get("Origin")
 	if origin == "" {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		rlogger.Printf("[WARN] request without origin. METHOD: %s, PATH: %s", req.Method, req.RequestURI)
+		rIP := GetRemoteIP(req)
+		rlogger.Printf("[WARN] request without origin. METHOD: %s, PATH: %s, Remote IP: %s", req.Method, req.RequestURI, rIP)
 	} else {
 		corsList := s.AllowedDomains
 		if strings.Contains(corsList, origin) {
