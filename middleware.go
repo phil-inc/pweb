@@ -82,12 +82,16 @@ func APIKeyAuth(ctx context.Context, e ErrorHandler, apiKey string) func(http.Ha
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			key, err := extractAPIKeyFromAuthHeader(r)
 			if err != nil {
-				logger.ErrorPrintf("Invalid authorization header %s\n", err)
+				msg := GetLogWithRequestDetails(r, fmt.Sprintf("Invalid authorization header: %s", err))
+				err = errors.New(msg)
 				e.HandleError(r, err)
+
 				WriteError(w, UnAuthorized)
 			} else {
 				if key != apiKey {
-					e.HandleError(r, errors.New("Invalid API Key. Unauthorized access"))
+					msg := GetLogWithRequestDetails(r, "Invalid API Key. Unauthorized access")
+					e.HandleError(r, errors.New(msg))
+
 					WriteError(w, UnAuthorized)
 				} else {
 					// Delegate request to the given handle
@@ -95,6 +99,7 @@ func APIKeyAuth(ctx context.Context, e ErrorHandler, apiKey string) func(http.Ha
 				}
 			}
 		}
+
 		return http.HandlerFunc(fn)
 	}
 
@@ -108,7 +113,9 @@ func JWTAuthWithCustomValidator(ctx context.Context, securityToken string, v Cus
 			// check JSON web token data
 			claims, err := checkJWT(w, r, v, securityToken)
 			if err != nil && err.Error() != "Token is expired" {
-				logger.ErrorPrintf("invalid token: %v", err)
+				msg := GetLogWithRequestDetails(r, fmt.Sprintf("invalid token: %s", err))
+				logger.ErrorPrintf(msg)
+
 				WriteError(w, UnAuthorized)
 				return
 			}
@@ -134,13 +141,17 @@ func UserAuthorizationHandler(ctx context.Context, e ErrorHandler) func(http.Han
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			userID := SessionUserID(r)
 			if r.Header.Get("X-User-Id") == "" {
-				logger.ErrorPrintf("No Request Header X-User-Id Found in Header of the Request")
+				msg := GetLogWithRequestDetails(r, "No Request Header X-User-Id Found in Header of the Request")
+				logger.ErrorPrintf(msg)
+
 				WriteError(w, UnAuthorized)
 				return
 			}
 
 			if userID != r.Header.Get("X-User-Id") {
-				logger.ErrorPrintf("Request Header X-User-Id does not match the ID in the token")
+				msg := GetLogWithRequestDetails(r, "Request Header X-User-Id does not match the ID in the token")
+				logger.ErrorPrintf(msg)
+
 				WriteError(w, UnAuthorized)
 				return
 			}
@@ -308,6 +319,12 @@ func WriteError(w http.ResponseWriter, err *Error) {
 	json.NewEncoder(w).Encode(Errors{[]*Error{err}})
 }
 
+//GetLogWithRequestDetails return the log message with request details
+func GetLogWithRequestDetails(r *http.Request, msg string) string {
+	rIP := GetRemoteIP(r)
+	return fmt.Sprintf("%s, METHOD: %s, PATH: %s, Remote IP: %s", msg, r.Method, r.RequestURI, rIP)
+}
+
 func checkJWT(w http.ResponseWriter, r *http.Request, v CustomTokenValidator, securityToken string) (jwt.MapClaims, error) {
 	if r.Method == "OPTIONS" {
 		return nil, nil
@@ -377,7 +394,7 @@ func extractTokenFromAuthHeader(r *http.Request) (string, error) {
 		return "", err
 	}
 	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != "bearer" {
-		return "", errors.New("Incorrect authorization header format. Invalid access token")
+		return "", errors.New("invalid token")
 	}
 
 	return authHeaderParts[1], nil
