@@ -148,8 +148,9 @@ func UserAuthorizationHandler(ctx context.Context, e ErrorHandler) func(http.Han
 				return
 			}
 
-			if userID != r.Header.Get("X-User-Id") {
-				msg := GetLogWithRequestDetails(r, "Request Header X-User-Id does not match the ID in the token")
+			xUserID := r.Header.Get("X-User-Id")
+			if userID != xUserID {
+				msg := GetLogWithRequestDetails(r, fmt.Sprintf("Request header X-User-Id does not match the user id in the token. User ID: %s, X User ID: %s", xUserID, userID))
 				logger.ErrorPrintf(msg)
 
 				WriteError(w, UnAuthorized)
@@ -322,7 +323,11 @@ func WriteError(w http.ResponseWriter, err *Error) {
 //GetLogWithRequestDetails return the log message with request details
 func GetLogWithRequestDetails(r *http.Request, msg string) string {
 	rIP := GetRemoteIP(r)
-	return fmt.Sprintf("%s, METHOD: %s, PATH: %s, Remote IP: %s", msg, r.Method, r.RequestURI, rIP)
+	appSrc := r.Header.Get("X-App-Source")
+	if appSrc == "" {
+		appSrc = "N/A"
+	}
+	return fmt.Sprintf("%s, METHOD: %s, PATH: %s, Remote IP: %s, App source: %s", msg, r.Method, r.RequestURI, rIP, appSrc)
 }
 
 func checkJWT(w http.ResponseWriter, r *http.Request, v CustomTokenValidator, securityToken string) (jwt.MapClaims, error) {
