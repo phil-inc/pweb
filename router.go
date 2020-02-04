@@ -334,11 +334,11 @@ func SessionUserID(r *http.Request) string {
 }
 
 // SessionIssuedTimeStamp returns the issued time stamp of current session
-func SessionIssuedTimeStamp(r *http.Request) string {
+func SessionIssuedTimeStamp(r *http.Request) float64 {
 	if jwtClaims, ok := r.Context().Value(SessionUserKey).(jwt.MapClaims); ok {
-		return jwtClaims["iat"].(string)
+		return jwtClaims["iat"].(float64)
 	}
-	return ""
+	return 0
 }
 
 // UserRoles current user roles
