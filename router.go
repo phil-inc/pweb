@@ -256,6 +256,14 @@ type APIResponse struct {
 	Data   interface{} `json:"data,omitempty"`
 }
 
+// PaginatedAPIResponse response data in paginated form
+type PaginatedAPIResponse struct {
+	Error      string      `json:"error,omitempty"`
+	Status     string      `json:"status,omitempty"`
+	TotalPages int         `json:"totalpages,omitempty"`
+	Data       interface{} `json:"data,omitempty"`
+}
+
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
@@ -294,6 +302,11 @@ func (res PDFDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 // DataResponse creates new API data response using the resource
 func DataResponse(data interface{}) APIResponse {
 	return APIResponse{Error: "", Status: "OK", Data: data}
+}
+
+// PaginatedDataResponse created data response with total pages
+func PaginatedDataResponse(data interface{}, totalPages int) PaginatedAPIResponse {
+	return PaginatedAPIResponse{Error: "", Status: "OK", TotalPages: totalPages, Data: data}
 }
 
 // StringErrorResponse constructs error response based on input
