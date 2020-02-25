@@ -260,7 +260,7 @@ type APIResponse struct {
 type PaginatedAPIResponse struct {
 	Error      string      `json:"error,omitempty"`
 	Status     string      `json:"status,omitempty"`
-	TotalPages int         `json:"totalpages,omitempty"`
+	TotalPages int         `json:"totalPages,omitempty"`
 	Data       interface{} `json:"data,omitempty"`
 }
 
