@@ -258,10 +258,11 @@ type APIResponse struct {
 
 // PaginatedAPIResponse response data in paginated form
 type PaginatedAPIResponse struct {
-	Error      string      `json:"error,omitempty"`
-	Status     string      `json:"status,omitempty"`
-	TotalPages int         `json:"totalPages,omitempty"`
-	Data       interface{} `json:"data,omitempty"`
+	Error       string      `json:"error,omitempty"`
+	Status      string      `json:"status,omitempty"`
+	CurrentPage int         `json:"currentPage,omitempty"`
+	TotalPages  int         `json:"totalPages,omitempty"`
+	Data        interface{} `json:"data,omitempty"`
 }
 
 // Write - Reponse interface implementation
@@ -305,8 +306,8 @@ func DataResponse(data interface{}) APIResponse {
 }
 
 // PaginatedDataResponse created data response with total pages
-func PaginatedDataResponse(data interface{}, totalPages int) PaginatedAPIResponse {
-	return PaginatedAPIResponse{Error: "", Status: "OK", TotalPages: totalPages, Data: data}
+func PaginatedDataResponse(data interface{}, currentPage, totalPages int) PaginatedAPIResponse {
+	return PaginatedAPIResponse{Error: "", Status: "OK", CurrentPage: currentPage, TotalPages: totalPages, Data: data}
 }
 
 // StringErrorResponse constructs error response based on input
