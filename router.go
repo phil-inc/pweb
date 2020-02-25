@@ -256,6 +256,14 @@ type APIResponse struct {
 	Data   interface{} `json:"data,omitempty"`
 }
 
+// Write - Reponse interface implementation
+func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
+	if res.Status == "ERROR" {
+		rlogger.ErrorPrintf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+	}
+	WriteJSON(w, res)
+}
+
 // PaginatedAPIResponse response data in paginated form
 type PaginatedAPIResponse struct {
 	Error       string      `json:"error,omitempty"`
@@ -266,7 +274,7 @@ type PaginatedAPIResponse struct {
 }
 
 // Write - Reponse interface implementation
-func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
+func (res PaginatedAPIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
 		rlogger.ErrorPrintf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
