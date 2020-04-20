@@ -14,6 +14,7 @@ import (
 	"runtime/debug"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/request"
 	"github.com/phil-inc/plog/logging"
 	"github.com/zserge/metric"
 )
@@ -346,12 +347,12 @@ func checkJWT(w http.ResponseWriter, r *http.Request, v CustomTokenValidator, se
 	}
 
 	// Now parse the token
-	parsedToken, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("invalid signing method: %s", token.Signature)
+	parsedToken, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
+		rsaPublicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(securityToken))
+		if err != nil {
+			return nil, err
 		}
-		return []byte(securityToken), nil
+		return rsaPublicKey, nil
 	})
 
 	if err != nil {
