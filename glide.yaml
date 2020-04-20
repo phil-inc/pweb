@@ -12,3 +12,5 @@ import:
   version: v0.2.0
 - package: github.com/NYTimes/gziphandler
   version: v1.1.1
+- package: github.com/francoispqt/gojay
+  version: 1398296d938f9fae26750ddc2fe356b6d897f799

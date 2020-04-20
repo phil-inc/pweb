@@ -2,7 +2,6 @@ package pweb
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"expvar"
 	"fmt"
@@ -14,6 +13,7 @@ import (
 	"runtime/debug"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/francoispqt/gojay"
 	"github.com/phil-inc/plog/logging"
 	"github.com/zserge/metric"
 )
@@ -179,7 +179,8 @@ func JSONBodyHandler(ctx context.Context, v interface{}) func(http.Handler) http
 			}
 
 			val := reflect.New(t).Interface()
-			err := json.NewDecoder(r.Body).Decode(val)
+			// err := json.NewDecoder(r.Body).Decode(val)
+			err := gojay.NewDecoder(r.Body).Decode(val)
 			if err != nil {
 				logger.ErrorPrintf("Error decoding JSON data. Error: %s", err)
 				WriteError(w, ErrBadRequest)
@@ -298,7 +299,9 @@ func ContentTypeHandler(next http.Handler) http.Handler {
 func WriteJSON(w http.ResponseWriter, resource interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	t1 := time.Now()
-	err := json.NewEncoder(w).Encode(resource)
+
+	err := gojay.NewEncoder(w).Encode(resource)
+	// err := json.NewEncoder(w).Encode(resource)
 	if err != nil {
 		logger.ErrorPrintf("Error writing JSON: %s", err)
 		WriteError(w, ErrInternalServer)
@@ -317,7 +320,9 @@ func WriteError(w http.ResponseWriter, err *Error) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(err.Status)
-	json.NewEncoder(w).Encode(Errors{[]*Error{err}})
+	// json.NewEncoder(w).Encode(Errors{[]*Error{err}})
+	gojay.NewEncoder(w).Encode(Errors{[]*Error{err}})
+
 }
 
 //GetLogWithRequestDetails return the log message with request details

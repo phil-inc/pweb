@@ -1,12 +1,14 @@
-hash: c4c5a0dc0739bc0906e1278b2681e8ad4270a7e7ee3d66559516fe0d0891c61e
-updated: 2019-11-01T09:59:49.0367-07:00
+hash: bd44aed03017d5a2c8a334051e3c85daed8c6a7d550f68a780342c538ee1b6bf
+updated: 2020-04-20T13:37:12.63713-07:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
+- name: github.com/francoispqt/gojay
+  version: 1398296d938f9fae26750ddc2fe356b6d897f799
 - name: github.com/julienschmidt/httprouter
   version: 348b672cd90d8190f8240323e372ecd1e66b59dc
 - name: github.com/justinas/alice
-  version: 03f45bd4b7dad4734bc4620e46a35789349abb20
+  version: 1051eaf52fcafdd87ead59d28b065f1fcb8274ec
 - name: github.com/NYTimes/gziphandler
   version: dd0439581c7657cb652dfe5c71d7d48baf39541d
 - name: github.com/paulbellamy/ratecounter
