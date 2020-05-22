@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+// 50th, 90th, 95th, 99th and 100th quantiles
 var quantileMap = map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.95: 0.005, 0.99: 0.001, 1.0: 0.0}
 
 var (
@@ -40,9 +41,9 @@ var (
 
 func sanitizeURL(url string) string {
 	removeParams := regexp.MustCompile(`\?.*`)
-	replaceObjectID := regexp.MustCompile(`\/[0-9a-fA-F]{24}\/`)
+	replaceObjectID := regexp.MustCompile(`\/[0-9a-fA-F]{24}`)
 	str := removeParams.ReplaceAllString(url, "")
-	str = replaceObjectID.ReplaceAllString(str, "/:id/")
+	str = replaceObjectID.ReplaceAllString(str, "/:id")
 	return str
 }
 
