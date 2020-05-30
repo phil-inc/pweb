@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -30,8 +31,11 @@ var counter *ratecounter.RateCounter
 
 var rlogger = logging.GetContextLogger("router")
 
+var hostName string
+
 //initialize http metrics
 func init() {
+	hostName, _ = os.Hostname()
 
 	counter = ratecounter.NewRateCounter(1 * time.Minute)
 

@@ -306,6 +306,7 @@ func ContentTypeHandler(next http.Handler) http.Handler {
 // WriteJSON writes resource to the output stream as JSON data.
 func WriteJSON(w http.ResponseWriter, resource interface{}) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Host-Id", hostName)
 	t1 := time.Now()
 	err := json.NewEncoder(w).Encode(resource)
 	if err != nil {
@@ -326,6 +327,7 @@ func WriteError(w http.ResponseWriter, err *Error) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(err.Status)
+	w.Header().Set("X-Host-Id", hostName)
 	json.NewEncoder(w).Encode(Errors{[]*Error{err}})
 }
 
