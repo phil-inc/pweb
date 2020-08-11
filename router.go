@@ -21,6 +21,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/paulbellamy/ratecounter"
 	"github.com/zserge/metric"
+	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
 )
 
 type sessionUser struct {
@@ -111,12 +112,12 @@ type PhilRouter struct {
 	Ctx            context.Context
 	AllowedDomains string
 	gzip           bool
-	r              *httprouter.Router
+	r              *httptrace.Router
 }
 
 // NewPhilRouter returns new PhilRouter which wraps the httprouter
 func NewPhilRouter(ctx context.Context) *PhilRouter {
-	return &PhilRouter{ctx, "*", false, httprouter.New()}
+	return &PhilRouter{ctx, "*", false, httptrace.New()}
 }
 
 //SetAllowedDomains update the list of allowed domains for CORS
