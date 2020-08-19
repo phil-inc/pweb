@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/phil-inc/plog/logging"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/dgrijalva/jwt-go"
@@ -145,12 +144,6 @@ func (s *PhilRouter) EnableHTTPMetrics() {
 	s.Get("/debug/vars", expvar.Handler())
 	//Expose opinionated web UI for metrics
 	s.Get("/debug/metrics", metric.Handler(metric.Exposed))
-}
-
-//EnablePrometheusMetrics enable metrics for prometheus
-func (s *PhilRouter) EnablePrometheusMetrics() {
-	//Expose metrics data for prometheus
-	s.Get("/metrics/prometheus", promhttp.Handler())
 }
 
 func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
