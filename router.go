@@ -325,6 +325,30 @@ func PDFResponse(contentDisposition string, data []byte) PDFDataResponse {
 	return PDFDataResponse{ContentDisposition: contentDisposition, PDFData: data}
 }
 
+// PaginatedDataResponse response data in paginated form
+type PaginatedDataResponse struct {
+	Error       string      `json:"error,omitempty"`
+	Status      string      `json:"status,omitempty"`
+	Total       int         `json:"total,omitempty"`
+	PerPage     int         `json:"perPage,omitempty"`
+	CurrentPage int         `json:"currentPage,omitempty"`
+	TotalPages  int         `json:"totalPages,omitempty"`
+	Data        interface{} `json:"data,omitempty"`
+}
+
+// Write - Reponse interface implementation
+func (res PaginatedDataResponse) Write(w http.ResponseWriter, r *http.Request) {
+	if res.Status == "ERROR" {
+		rlogger.ErrorPrintf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+	}
+	WriteJSON(w, res)
+}
+
+// PaginatedResponse created data response with total pages
+func PaginatedResponse(data interface{}, total, perPage, currentPage, totalPages int) PaginatedDataResponse {
+	return PaginatedDataResponse{Error: "", Status: "OK", Total: total, PerPage: perPage, CurrentPage: currentPage, TotalPages: totalPages, Data: data}
+}
+
 // RequestBody returns the request body
 func RequestBody(r *http.Request) interface{} {
 	return r.Context().Value(Body)
