@@ -19,6 +19,15 @@ func (c Controller) Get(path string, f func(http.ResponseWriter, *http.Request) 
 	c.router.Get(path, c.chain.ThenFunc(ResponseHandler(f)))
 }
 
+//Head returns HEAD handler function
+func (c Controller) Head(path string, body interface{}, f func(http.ResponseWriter, *http.Request) Response) {
+	if body == nil {
+		c.router.Head(path, c.chain.ThenFunc(ResponseHandler(f)))
+	} else {
+		c.router.Head(path, c.chain.Append(JSONBodyHandler(c.ctx, body)).ThenFunc(ResponseHandler(f)))
+	}
+}
+
 //Post returns POST handler function
 func (c Controller) Post(path string, body interface{}, f func(http.ResponseWriter, *http.Request) Response) {
 	if body == nil {

@@ -183,6 +183,11 @@ func (s *PhilRouter) Get(path string, handler http.Handler) {
 	}
 }
 
+// Head wraps httprouter's HEAD function
+func (s *PhilRouter) Head(path string, handler http.Handler) {
+	s.r.HEAD(path, wrapHandler(s.Ctx, handler))
+}
+
 // Post wraps httprouter's POST function
 func (s *PhilRouter) Post(path string, handler http.Handler) {
 	s.r.POST(path, wrapHandler(s.Ctx, handler))
