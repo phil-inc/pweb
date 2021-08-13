@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/justinas/alice v1.2.0

@@ -13,8 +13,8 @@ import (
 
 	"runtime/debug"
 
-	jwt "github.com/golang-jwt/jwt"
-	"github.com/golang-jwt/jwt/request"
+	jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v4/request"
 	"github.com/phil-inc/plog/logging"
 	"github.com/zserge/metric"
 )
