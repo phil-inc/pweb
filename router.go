@@ -16,7 +16,7 @@ import (
 	"github.com/phil-inc/plog/logging"
 
 	"github.com/NYTimes/gziphandler"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/julienschmidt/httprouter"
 	"github.com/paulbellamy/ratecounter"
 	"github.com/zserge/metric"
