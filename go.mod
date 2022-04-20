@@ -13,7 +13,6 @@ require (
 	github.com/paulbellamy/ratecounter v0.2.0
 	github.com/phil-inc/plog v0.0.0-20190215205726-104ca8d1669e
 	github.com/philhofer/fwd v1.1.1 // indirect
-	github.com/zserge/metric v0.1.0
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.32.0
 )
