@@ -494,7 +494,7 @@ func getContentSecurityPolicy() string {
 	style-src 'self' https://ajax.googleapis.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; 
 	frame-src 'self'; 
 	img-src *; 
-	media-src * 'self'; 
+	media-src *; 
 	manifest-src 'self'; 
 	font-src 'self' https://fonts.gstatic.com;`
 	return policy
