@@ -488,14 +488,14 @@ func isPrivateSubnet(ipAddress net.IP) bool {
 }
 
 func getContentSecurityPolicy() string {
-	policy := `default-src 'self'; 
-	script-src 'self' https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.js https://cdnjs.cloudflare.com/ajax/libs/ng-csv/0.3.6/ng-csv.min.js https://cdn.polyfill.io/v2/polyfill.min.js https://edge.fullstory.com/s/fs.js; 
+	policy := `default-src 'self';
+	script-src 'self' https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.js https://cdnjs.cloudflare.com/ajax/libs/ng-csv/0.3.6/ng-csv.min.js https://cdn.polyfill.io/v2/polyfill.min.js https://edge.fullstory.com/s/fs.js;
 	object-src 'self';
-	style-src 'self' https://ajax.googleapis.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; 
-	frame-src 'self'; 
-	img-src *; 
-	media-src *; 
-	manifest-src 'self'; 
+	style-src 'self' https://ajax.googleapis.com https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+	frame-src 'self';
+	img-src *;
+	media-src *;
+	manifest-src 'self';
 	font-src 'self' https://fonts.gstatic.com;`
 	return policy
 }
