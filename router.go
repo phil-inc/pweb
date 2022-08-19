@@ -21,6 +21,8 @@ import (
 	"github.com/paulbellamy/ratecounter"
 	"github.com/zserge/metric"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type sessionUser struct {
@@ -144,6 +146,12 @@ func (s *PhilRouter) EnableHTTPMetrics() {
 	s.Get("/debug/vars", expvar.Handler())
 	//Expose opinionated web UI for metrics
 	s.Get("/debug/metrics", metric.Handler(metric.Exposed))
+}
+
+//EnablePrometheusMetrics enable metrics for prometheus
+func (s *PhilRouter) EnablePrometheusMetrics() {
+	//Expose metrics data for prometheus
+	s.Get("/metrics", promhttp.Handler())
 }
 
 func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {

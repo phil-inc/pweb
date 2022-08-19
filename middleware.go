@@ -257,9 +257,11 @@ func MetricsHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		//start time
 		t1 := time.Now()
-		//invoke next handler on a chain
-		next.ServeHTTP(w, r)
 
+		// custom ResponseWriter wrapper to capture http status code and response size
+		httpResponse := logHTTPResponse{ResponseWriter: w}
+
+		next.ServeHTTP(&httpResponse, r)
 		//end time
 		t2 := time.Now()
 
@@ -278,6 +280,8 @@ func MetricsHandler(next http.Handler) http.Handler {
 
 		//collect rate count
 		counter.Incr(1)
+
+		logPrometheusMetrics(httpResponse, r, diff)
 	}
 
 	return http.HandlerFunc(fn)
