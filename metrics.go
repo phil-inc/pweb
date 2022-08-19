@@ -77,7 +77,7 @@ func logPrometheusMetrics(httpResponse logHTTPResponse, r *http.Request, respDur
 	url := sanitizeURL(r)
 	statusCode := fmt.Sprintf("%d", httpResponse.status)
 
-	responseDuration.With(prometheus.Labels{"endpoint": url, "method": r.Method, "status": statusCode}).Observe(float64(respDuration.Milliseconds()))
+	responseDuration.With(prometheus.Labels{"endpoint": url, "method": r.Method, "status": statusCode}).Observe(float64(respDuration.Seconds()))
 
 	requestCounter.With(prometheus.Labels{"endpoint": url, "method": r.Method, "status": statusCode}).Inc()
 
