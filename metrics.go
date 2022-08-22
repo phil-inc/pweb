@@ -51,10 +51,14 @@ func sanitizeURL(r *http.Request) string {
 	url := r.RequestURI
 	removeQuery := regexp.MustCompile(`\?.*`)
 	str := removeQuery.ReplaceAllString(url, "")
-	params := r.Context().Value(Params).(httprouter.Params)
-	for _, p := range params {
-		str = strings.Replace(str, p.Value, fmt.Sprintf(":%s", p.Key), 1)
+	vals := r.Context().Value(Params)
+	if vals != nil {
+		params := vals.(httprouter.Params)
+		for _, p := range params {
+			str = strings.Replace(str, p.Value, fmt.Sprintf(":%s", p.Key), 1)
+		}
 	}
+
 	return str
 }
 
