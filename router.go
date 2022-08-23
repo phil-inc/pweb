@@ -15,7 +15,6 @@ import (
 	"github.com/NYTimes/gziphandler"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/julienschmidt/httprouter"
-	"github.com/paulbellamy/ratecounter"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -25,8 +24,6 @@ type sessionUser struct {
 	Key string
 }
 
-var counter *ratecounter.RateCounter
-
 var rlogger = logging.GetContextLogger("router")
 
 var hostName string
@@ -34,10 +31,6 @@ var hostName string
 //initialize http metrics
 func init() {
 	hostName, _ = os.Hostname()
-}
-
-func bToMB(b uint64) uint64 {
-	return b / 1024 / 1024
 }
 
 // SessionUserKey key for context
@@ -381,27 +374,27 @@ func inRange(r ipRange, ipAddress net.IP) bool {
 //IP ranges to filter out private sub-nets, as well as multi-cast address space, and localhost address space
 //Reference - https://whatismyipaddress.com/private-ip
 var privateRanges = []ipRange{
-	ipRange{
+	{
 		start: net.ParseIP("10.0.0.0"),
 		end:   net.ParseIP("10.255.255.255"),
 	},
-	ipRange{
+	{
 		start: net.ParseIP("100.64.0.0"),
 		end:   net.ParseIP("100.127.255.255"),
 	},
-	ipRange{
+	{
 		start: net.ParseIP("172.16.0.0"),
 		end:   net.ParseIP("172.31.255.255"),
 	},
-	ipRange{
+	{
 		start: net.ParseIP("192.0.0.0"),
 		end:   net.ParseIP("192.0.0.255"),
 	},
-	ipRange{
+	{
 		start: net.ParseIP("192.168.0.0"),
 		end:   net.ParseIP("192.168.255.255"),
 	},
-	ipRange{
+	{
 		start: net.ParseIP("198.18.0.0"),
 		end:   net.ParseIP("198.19.255.255"),
 	},

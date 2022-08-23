@@ -10,7 +10,6 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/justinas/alice v1.2.0
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/paulbellamy/ratecounter v0.2.0
 	github.com/phil-inc/plog v0.0.0-20190215205726-104ca8d1669e
 	github.com/philhofer/fwd v1.1.1 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect

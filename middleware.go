@@ -223,7 +223,7 @@ func RecoverHandler(ctx context.Context, e ErrorHandler) func(http.Handler) http
 					case error:
 						err = x
 					default:
-						err = errors.New("Unknown panic")
+						err = errors.New("unknown panic")
 					}
 					if err != nil {
 						perr := fmt.Errorf("PANIC: %s", err.Error())
@@ -372,7 +372,7 @@ func extractAPIKeyFromAuthHeader(r *http.Request) (string, error) {
 		return "", err
 	}
 	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != "philkey" {
-		return "", errors.New("Incorrect authorization header format. Invalid API Key")
+		return "", errors.New("incorrect authorization header format. Invalid API Key")
 	}
 	return authHeaderParts[1], nil
 }
