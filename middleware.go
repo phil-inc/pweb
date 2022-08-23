@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"expvar"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -16,7 +15,6 @@ import (
 	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
 	"github.com/phil-inc/plog/logging"
-	"github.com/zserge/metric"
 )
 
 type body struct {
@@ -266,20 +264,6 @@ func MetricsHandler(next http.Handler) http.Handler {
 		t2 := time.Now()
 
 		diff := t2.Sub(t1)
-		//response time histogram
-		expvar.Get("http:response:time:sec").(metric.Metric).Add(diff.Seconds())
-
-		//HTTP request metrics counters
-		expvar.Get("http:request:count").(metric.Metric).Add(1)
-		m := strings.ToLower(r.Method)
-		k := fmt.Sprintf("http:%s:count", m)
-		v := expvar.Get(k)
-		if v != nil {
-			v.(metric.Metric).Add(1)
-		}
-
-		//collect rate count
-		counter.Incr(1)
 
 		logPrometheusMetrics(httpResponse, r, diff)
 	}
@@ -304,23 +288,17 @@ func ContentTypeHandler(next http.Handler) http.Handler {
 func WriteJSON(w http.ResponseWriter, resource interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Host-Id", hostName)
-	t1 := time.Now()
+
 	err := json.NewEncoder(w).Encode(resource)
 	if err != nil {
 		logger.ErrorPrintf("Error writing JSON: %s", err)
 		WriteError(w, ErrInternalServer)
 		return
 	}
-	//end time
-	t2 := time.Now()
-
-	diff := t2.Sub(t1)
-	expvar.Get("http:json-parse:time:sec").(metric.Metric).Add(diff.Seconds())
 }
 
 // WriteError writes error response
 func WriteError(w http.ResponseWriter, err *Error) {
-	expvar.Get("http:error:count").(metric.Metric).Add(1)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(err.Status)

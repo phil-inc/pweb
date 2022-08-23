@@ -13,10 +13,11 @@ require (
 	github.com/paulbellamy/ratecounter v0.2.0
 	github.com/phil-inc/plog v0.0.0-20190215205726-104ca8d1669e
 	github.com/philhofer/fwd v1.1.1 // indirect
-	github.com/zserge/metric v0.1.0
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.32.0
 )
+
+require github.com/prometheus/client_golang v1.13.0
 
 require (
 	github.com/DataDog/datadog-go v4.4.0+incompatible // indirect
@@ -25,7 +26,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/prometheus/client_golang v1.13.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect

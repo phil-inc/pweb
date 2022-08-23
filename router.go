@@ -4,14 +4,11 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"expvar"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
-	"runtime"
 	"strings"
-	"time"
 
 	"github.com/phil-inc/plog/logging"
 
@@ -19,7 +16,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/julienschmidt/httprouter"
 	"github.com/paulbellamy/ratecounter"
-	"github.com/zserge/metric"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -38,64 +34,6 @@ var hostName string
 //initialize http metrics
 func init() {
 	hostName, _ = os.Hostname()
-
-	counter = ratecounter.NewRateCounter(1 * time.Minute)
-
-	// Some Go internal metrics
-	numgoroutine := "system:go:numgoroutine"
-	numcgocall := "system:go:numcgocall"
-	numcpu := "system:go:numcpu"
-	alloc := "system:go:alloc"
-	heapalloc := "system:go:heapalloc"
-	alloctotal := "system:go:alloctotal"
-	numgc := "system:go:numgc"
-
-	frames := []string{"5m1m", "15m1m", "1h1m", "24h1h", "7d1d"}
-
-	expvar.Publish(numgoroutine, metric.NewGauge(frames...))
-	expvar.Publish(numcgocall, metric.NewGauge(frames...))
-	expvar.Publish(numcpu, metric.NewGauge(frames...))
-	expvar.Publish(alloc, metric.NewGauge(frames...))
-	expvar.Publish(heapalloc, metric.NewGauge(frames...))
-	expvar.Publish(alloctotal, metric.NewGauge(frames...))
-	expvar.Publish(numgc, metric.NewGauge(frames...))
-	go func() {
-		for range time.Tick(5 * time.Minute) {
-			m := &runtime.MemStats{}
-			runtime.ReadMemStats(m)
-
-			expvar.Get(numgoroutine).(metric.Metric).Add(float64(runtime.NumGoroutine()))
-			expvar.Get(numcgocall).(metric.Metric).Add(float64(runtime.NumCgoCall()))
-			expvar.Get(numcpu).(metric.Metric).Add(float64(runtime.NumCPU()))
-			expvar.Get(alloc).(metric.Metric).Add(float64(bToMB(m.Alloc)))
-			expvar.Get(heapalloc).(metric.Metric).Add(float64(bToMB(m.HeapAlloc)))
-			expvar.Get(alloctotal).(metric.Metric).Add(float64(bToMB(m.TotalAlloc)))
-			expvar.Get(numgc).(metric.Metric).Add(float64(m.NumGC))
-		}
-	}()
-
-	// A counter that keeps different HTTP request counts for 7 days, 24 hours, 1 hour, 15 minutes, 5 minutes of time with different precision:
-	expvar.Publish("http:get:count", metric.NewCounter(frames...))
-	expvar.Publish("http:post:count", metric.NewCounter(frames...))
-	expvar.Publish("http:put:count", metric.NewCounter(frames...))
-	expvar.Publish("http:delete:count", metric.NewCounter(frames...))
-	expvar.Publish("http:request:count", metric.NewCounter(frames...))
-	expvar.Publish("http:error:count", metric.NewCounter(frames...))
-
-	//request rate per minute
-	reqRate := "http:request:rate:min"
-	expvar.Publish(reqRate, metric.NewGauge(frames...))
-	go func() {
-		for range time.Tick(1 * time.Minute) {
-			expvar.Get(reqRate).(metric.Metric).Add(float64(counter.Rate()))
-		}
-	}()
-
-	//response time
-	expvar.Publish("http:response:time:sec", metric.NewGauge("5m1m", "15m1m", "1h5m", "24h1h", "7d1d"))
-
-	//JSON parsing time
-	expvar.Publish("http:json-parse:time:sec", metric.NewGauge("5m1m", "15m1m", "1h5m", "24h1h", "7d1d"))
 }
 
 func bToMB(b uint64) uint64 {
@@ -136,16 +74,6 @@ func (s *PhilRouter) EnableGzip(level int) {
 		compressor = c
 		s.gzip = true
 	}
-}
-
-//EnableHTTPMetrics enable http metrics collections. In order for these 2 work and collect pweb http metrics
-//pweb.MetricsHandler should be added in the handler chain
-//metrics collection is based on https://zserge.com/blog/metrics.html
-func (s *PhilRouter) EnableHTTPMetrics() {
-	//Expose raw metrics data
-	s.Get("/debug/vars", expvar.Handler())
-	//Expose opinionated web UI for metrics
-	s.Get("/debug/metrics", metric.Handler(metric.Exposed))
 }
 
 //EnablePrometheusMetrics enable metrics for prometheus
