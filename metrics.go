@@ -45,6 +45,15 @@ var (
 		},
 		[]string{"endpoint", "method", "status"},
 	)
+
+	responseDurationBuckets = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "http_request_duration_seconds_bucket",
+			Help:    "Total duration for request",
+			Buckets: []float64{0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0},
+		},
+		[]string{"endpoint", "method", "status"},
+	)
 )
 
 func sanitizeURL(r *http.Request) string {
@@ -82,6 +91,7 @@ func logPrometheusMetrics(httpResponse logHTTPResponse, r *http.Request, respDur
 	statusCode := fmt.Sprintf("%d", httpResponse.status)
 
 	responseDuration.With(prometheus.Labels{"endpoint": url, "method": r.Method, "status": statusCode}).Observe(float64(respDuration.Seconds()))
+	responseDurationBuckets.With(prometheus.Labels{"endpoint": url, "method": r.Method, "status": statusCode}).Observe(float64(respDuration.Seconds()))
 
 	requestCounter.With(prometheus.Labels{"endpoint": url, "method": r.Method, "status": statusCode}).Inc()
 
