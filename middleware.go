@@ -14,7 +14,7 @@ import (
 
 	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
-	"github.com/phil-inc/plog/logging"
+	logger "github.com/phil-inc/plog-ng/pkg/core"
 )
 
 type body struct {
@@ -27,7 +27,7 @@ type params struct {
 // Body key for request body
 var Body = body{Key: "Body"}
 
-//Params key for params
+// Params key for params
 var Params = params{Key: "Params"}
 
 // Errors represents json errors
@@ -48,12 +48,12 @@ type Error struct {
 	Detail string `json:"detail"`
 }
 
-//ErrorHandler handler for all the middelware errors
+// ErrorHandler handler for all the middelware errors
 type ErrorHandler interface {
 	HandleError(r *http.Request, err error)
 }
 
-//CustomTokenValidator handler for any custom token validation for the application
+// CustomTokenValidator handler for any custom token validation for the application
 type CustomTokenValidator interface {
 	IsValid(r *http.Request, userID, rawToken string, claims jwt.MapClaims) bool
 }
@@ -72,8 +72,6 @@ var (
 	// ErrInternalServer error to represent server errors
 	ErrInternalServer = &Error{"internal_server_error", 500, "Internal Server Error", "Something went wrong."}
 )
-
-var logger = logging.GetContextLogger("middleware")
 
 // APIKeyAuth basically checks the authorization header for API Key
 func APIKeyAuth(ctx context.Context, e ErrorHandler, apiKey string) func(http.Handler) http.Handler {
@@ -113,7 +111,7 @@ func JWTAuthWithCustomValidator(ctx context.Context, securityToken string, v Cus
 			claims, err := checkJWT(w, r, v, securityToken)
 			if err != nil && err.Error() != "Token is expired" {
 				msg := GetLogWithRequestDetails(r, fmt.Sprintf("invalid token: %s", err))
-				logger.ErrorPrintf(msg)
+				logger.Warn(msg)
 
 				WriteError(w, UnAuthorized)
 				return
@@ -141,7 +139,7 @@ func UserAuthorizationHandler(ctx context.Context, e ErrorHandler) func(http.Han
 			userID := SessionUserID(r)
 			if r.Header.Get("X-User-Id") == "" {
 				msg := GetLogWithRequestDetails(r, "No Request Header X-User-Id Found in Header of the Request")
-				logger.ErrorPrintf(msg)
+				logger.Warn(msg)
 
 				WriteError(w, UnAuthorized)
 				return
@@ -150,7 +148,7 @@ func UserAuthorizationHandler(ctx context.Context, e ErrorHandler) func(http.Han
 			xUserID := r.Header.Get("X-User-Id")
 			if userID != xUserID {
 				msg := GetLogWithRequestDetails(r, fmt.Sprintf("Request header X-User-Id does not match the user id in the token. User ID: %s, X User ID: %s", xUserID, userID))
-				logger.ErrorPrintf(msg)
+				logger.Error(msg)
 
 				WriteError(w, UnAuthorized)
 				return
@@ -180,7 +178,7 @@ func JSONBodyHandler(ctx context.Context, v interface{}) func(http.Handler) http
 			val := reflect.New(t).Interface()
 			err := json.NewDecoder(r.Body).Decode(val)
 			if err != nil {
-				logger.ErrorPrintf("Error decoding JSON data. Error: %s", err)
+				logger.Errorf("Error decoding JSON data. Error: %s", err)
 				WriteError(w, ErrBadRequest)
 				return
 			}
@@ -250,7 +248,7 @@ func RecoverHandler(ctx context.Context, e ErrorHandler) func(http.Handler) http
 	return m
 }
 
-//MetricsHandler collects the different http metrics using go expvar package
+// MetricsHandler collects the different http metrics using go expvar package
 func MetricsHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		//start time
@@ -271,7 +269,7 @@ func MetricsHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-//ContentTypeHandler make sure content type is appplication/json for PUT/POST data
+// ContentTypeHandler make sure content type is appplication/json for PUT/POST data
 func ContentTypeHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Content-Type") != "application/json" {
@@ -291,7 +289,7 @@ func WriteJSON(w http.ResponseWriter, resource interface{}) {
 
 	err := json.NewEncoder(w).Encode(resource)
 	if err != nil {
-		logger.ErrorPrintf("Error writing JSON: %s", err)
+		logger.Errorf("Error writing JSON: %s", err)
 		WriteError(w, ErrInternalServer)
 		return
 	}
@@ -306,7 +304,7 @@ func WriteError(w http.ResponseWriter, err *Error) {
 	json.NewEncoder(w).Encode(Errors{[]*Error{err}})
 }
 
-//GetLogWithRequestDetails return the log message with request details
+// GetLogWithRequestDetails return the log message with request details
 func GetLogWithRequestDetails(r *http.Request, msg string) string {
 	rIP := GetRemoteIP(r)
 	appSrc := r.Header.Get("X-App-Source")
