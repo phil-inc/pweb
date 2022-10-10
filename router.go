@@ -10,13 +10,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/phil-inc/plog/logging"
-
 	"github.com/NYTimes/gziphandler"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/julienschmidt/httprouter"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
 
+	logger "github.com/phil-inc/plog-ng/pkg/core"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -24,11 +23,9 @@ type sessionUser struct {
 	Key string
 }
 
-var rlogger = logging.GetContextLogger("router")
-
 var hostName string
 
-//initialize http metrics
+// initialize http metrics
 func init() {
 	hostName, _ = os.Hostname()
 }
@@ -52,15 +49,16 @@ func NewPhilRouter(ctx context.Context) *PhilRouter {
 	return &PhilRouter{ctx, "*", false, httptrace.New()}
 }
 
-//SetAllowedDomains update the list of allowed domains for CORS
+// SetAllowedDomains update the list of allowed domains for CORS
 func (s *PhilRouter) SetAllowedDomains(domains string) {
 	s.AllowedDomains = domains
 }
 
-//EnableGzip enable gzip compression for given level in the range from no compression to best
-//  NoCompression      = 0
-//	BestSpeed          = 1
-//	BestCompression    = 9
+// EnableGzip enable gzip compression for given level in the range from no compression to best
+//
+//	 NoCompression      = 0
+//		BestSpeed          = 1
+//		BestCompression    = 9
 func (s *PhilRouter) EnableGzip(level int) {
 	c, err := gziphandler.NewGzipLevelHandler(level)
 	if err == nil {
@@ -69,7 +67,7 @@ func (s *PhilRouter) EnableGzip(level int) {
 	}
 }
 
-//EnablePrometheusMetrics enable metrics for prometheus
+// EnablePrometheusMetrics enable metrics for prometheus
 func (s *PhilRouter) EnablePrometheusMetrics() {
 	//Expose metrics data for prometheus
 	s.Get("/metrics", promhttp.Handler())
@@ -150,10 +148,10 @@ func wrapHandler(ctx context.Context, h http.Handler) httprouter.Handle {
 // ErrMissingRequiredData error to represent missing data error
 var ErrMissingRequiredData = errors.New("missing required data")
 
-//ErrNotRecognized error for any unrecognized client
+// ErrNotRecognized error for any unrecognized client
 var ErrNotRecognized = errors.New("not recognized")
 
-//ErrForbidden 403
+// ErrForbidden 403
 var ErrForbidden = errors.New("forbidden")
 
 // HTMLResponse response as HTML data
@@ -199,7 +197,7 @@ type APIResponse struct {
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
-		rlogger.ErrorPrintf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
@@ -241,7 +239,7 @@ func StringErrorResponse(err string) APIResponse {
 	return APIResponse{Error: err, Status: "ERROR", Data: nil}
 }
 
-//ErrorResponse constructs error response from the API
+// ErrorResponse constructs error response from the API
 func ErrorResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil}
 }
@@ -274,7 +272,7 @@ type PaginatedDataResponse struct {
 // Write - Reponse interface implementation
 func (res PaginatedDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
-		rlogger.ErrorPrintf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
@@ -322,7 +320,7 @@ func ParamByName(name string, r *http.Request) string {
 	return params.ByName(name)
 }
 
-//Authorize checks if given request is authorized
+// Authorize checks if given request is authorized
 func Authorize(w http.ResponseWriter, r *http.Request) {
 	sid := SessionUserID(r)
 	uid := ParamByName("uid", r)
@@ -332,9 +330,9 @@ func Authorize(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//GetRemoteIP returns the IP address of the client sending the request. It walks backwards through the number of ip
-//addresses by the number of proxies you have in your environment to the internet. That way, you will be adverse to
-//any mucking with the X-Forwarded-For header by the client
+// GetRemoteIP returns the IP address of the client sending the request. It walks backwards through the number of ip
+// addresses by the number of proxies you have in your environment to the internet. That way, you will be adverse to
+// any mucking with the X-Forwarded-For header by the client
 func GetRemoteIP(r *http.Request) string {
 	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
 		addresses := strings.Split(r.Header.Get(h), ",")
@@ -356,7 +354,7 @@ func GetRemoteIP(r *http.Request) string {
 	return ""
 }
 
-//ipRange - a structure that holds the start and end of a range of ip addresses
+// ipRange - a structure that holds the start and end of a range of ip addresses
 type ipRange struct {
 	start net.IP
 	end   net.IP
@@ -371,8 +369,8 @@ func inRange(r ipRange, ipAddress net.IP) bool {
 	return false
 }
 
-//IP ranges to filter out private sub-nets, as well as multi-cast address space, and localhost address space
-//Reference - https://whatismyipaddress.com/private-ip
+// IP ranges to filter out private sub-nets, as well as multi-cast address space, and localhost address space
+// Reference - https://whatismyipaddress.com/private-ip
 var privateRanges = []ipRange{
 	{
 		start: net.ParseIP("10.0.0.0"),
