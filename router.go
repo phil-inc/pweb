@@ -13,10 +13,9 @@ import (
 	"github.com/NYTimes/gziphandler"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/julienschmidt/httprouter"
-	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
-
 	logger "github.com/phil-inc/plog-ng/pkg/core"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
 )
 
 type sessionUser struct {

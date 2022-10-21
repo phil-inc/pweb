@@ -269,7 +269,7 @@ func MetricsHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-// ContentTypeHandler make sure content type is appplication/json for PUT/POST data
+//ContentTypeHandler make sure content type is appplication/json for PUT/POST data
 func ContentTypeHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Content-Type") != "application/json" {
