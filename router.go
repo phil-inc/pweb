@@ -14,6 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/julienschmidt/httprouter"
 	logger "github.com/phil-inc/plog-ng/pkg/core"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
 )
 
@@ -63,6 +64,12 @@ func (s *PhilRouter) EnableGzip(level int) {
 		compressor = c
 		s.gzip = true
 	}
+}
+
+// EnablePrometheusMetrics enable metrics for prometheus
+func (s *PhilRouter) EnablePrometheusMetrics() {
+	//Expose metrics data for prometheus
+	s.Get("/metrics", promhttp.Handler())
 }
 
 func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {

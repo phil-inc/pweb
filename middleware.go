@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
 	"runtime/debug"
 
@@ -245,6 +246,27 @@ func RecoverHandler(ctx context.Context, e ErrorHandler) func(http.Handler) http
 	}
 
 	return m
+}
+
+// MetricsHandler collects the different http metrics using go expvar package
+func MetricsHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		//start time
+		t1 := time.Now()
+
+		// custom ResponseWriter wrapper to capture http status code and response size
+		httpResponse := logHTTPResponse{ResponseWriter: w}
+
+		next.ServeHTTP(&httpResponse, r)
+		//end time
+		t2 := time.Now()
+
+		diff := t2.Sub(t1)
+
+		logPrometheusMetrics(httpResponse, r, diff)
+	}
+
+	return http.HandlerFunc(fn)
 }
 
 //ContentTypeHandler make sure content type is appplication/json for PUT/POST data
