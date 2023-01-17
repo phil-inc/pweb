@@ -88,7 +88,7 @@ func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With, X-App-Source, X-Request-Id, X-User-Id, Strict-Transport-Security, X-Forwarded-For, X-Real-Ip, Browser-User-Agent")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With, X-App-Source, X-Request-Id, X-User-Id, Strict-Transport-Security, X-Forwarded-For, X-Real-Ip, X-Phil-Canary, X-Phil-Debug, Browser-User-Agent")
 	w.Header().Set("Access-Control-Max-Age", "7200")
 	if req.Method == "OPTIONS" {
 		w.(http.Flusher).Flush()
