@@ -269,7 +269,7 @@ func MetricsHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-//ContentTypeHandler make sure content type is appplication/json for PUT/POST data
+// ContentTypeHandler make sure content type is appplication/json for PUT/POST data
 func ContentTypeHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Content-Type") != "application/json" {
@@ -288,6 +288,19 @@ func WriteJSON(w http.ResponseWriter, resource interface{}) {
 	w.Header().Set("X-Host-Id", hostName)
 
 	err := json.NewEncoder(w).Encode(resource)
+	if err != nil {
+		logger.Errorf("Error writing JSON: %s", err)
+		WriteError(w, ErrInternalServer)
+		return
+	}
+}
+
+func WriteErrorJSON(w http.ResponseWriter, e *Error, resources interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(e.Status)
+	w.Header().Set("X-Host-Id", hostName)
+
+	err := json.NewEncoder(w).Encode(resources)
 	if err != nil {
 		logger.Errorf("Error writing JSON: %s", err)
 		WriteError(w, ErrInternalServer)

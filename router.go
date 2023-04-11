@@ -197,6 +197,9 @@ type APIResponse struct {
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
 		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		// Patch to fix API returning 200 on error response, but will always return 500 regardless of the error
+		WriteErrorJSON(w, ErrInternalServer, res)
+		return
 	}
 	WriteJSON(w, res)
 }
