@@ -201,6 +201,23 @@ func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, res)
 }
 
+// NewAPIResponse response data representation for API with error as struct
+type NewAPIResponse struct {
+	Error  *Error      `json:"error,omitempty"`
+	Status string      `json:"status,omitempty"`
+	Data   interface{} `json:"data,omitempty"`
+}
+
+// Write - Reponse interface implementation
+func (res NewAPIResponse) Write(w http.ResponseWriter, r *http.Request) {
+	if res.Error != nil {
+		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		WriteError(w, res.Error)
+		return
+	}
+	WriteJSON(w, res)
+}
+
 // ImageDataResponse - response which has the header and byte data for an image.
 type ImageDataResponse struct {
 	ImageType string // set to '*' for variable image types.
@@ -231,6 +248,16 @@ func (res PDFDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 // DataResponse creates new API data response using the resource
 func DataResponse(data interface{}) APIResponse {
 	return APIResponse{Error: "", Status: "OK", Data: data}
+}
+
+// NewDataResponse creates new API data response using the resource
+func NewDataResponse(data interface{}) NewAPIResponse {
+	return NewAPIResponse{Error: nil, Status: "OK", Data: data}
+}
+
+// NewErrorResponse constructs error response from the API with error struct
+func NewErrorResponse(err *Error) NewAPIResponse {
+	return NewAPIResponse{Error: err, Status: "ERROR", Data: nil}
 }
 
 // StringErrorResponse constructs error response based on input
