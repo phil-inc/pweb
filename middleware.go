@@ -147,7 +147,7 @@ func UserAuthorizationHandler(ctx context.Context, e ErrorHandler) func(http.Han
 
 			xUserID := r.Header.Get("X-User-Id")
 			if userID != xUserID {
-				msg := GetLogWithRequestDetails(r, fmt.Sprintf("Request header X-User-Id does not match the user id in the token. User ID: %s, X User ID: %s", xUserID, userID))
+				msg := GetLogWithRequestDetails(r, fmt.Sprintf("Request header X-User-Id does not match the user id in the token. User ID: %s, X User ID: %s", userID, xUserID))
 				logger.Error(msg)
 
 				WriteError(w, UnAuthorized)
