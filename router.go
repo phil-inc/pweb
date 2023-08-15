@@ -196,11 +196,11 @@ type APIResponse struct {
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
-		logger.Errorf("API - PATH: %s:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 
 	if res.Status == "WARN" {
-		logger.Warnf("API - PATH: %s:: Issue while handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Warnf("[API][PATH: %s]:: Issue while handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
@@ -275,11 +275,11 @@ type PaginatedDataResponse struct {
 // Write - Reponse interface implementation
 func (res PaginatedDataResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
-		logger.Errorf("API - PATH: %s:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 
 	if res.Status == "WARN" {
-		logger.Warnf("API - PATH: %s:: Issue while handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Warnf("[API][PATH: %s]:: Issue while handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
