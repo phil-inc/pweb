@@ -186,17 +186,37 @@ func (res CSVResponse) Write(w http.ResponseWriter, r *http.Request) {
 	w.Write(res.CSV)
 }
 
-// APIResponse response data representation for API
+type ErrorData struct {
+	LogType LogType
+}
+
+type LogType string
+
+const (
+	LogTypeInfo    LogType = "INFO"
+	LogTypeWarning LogType = "WARNING"
+	LogTypeError   LogType = "ERROR"
+)
+
+// APIResponse is the response data representation for API
 type APIResponse struct {
 	Error  string      `json:"error,omitempty"`
 	Status string      `json:"status,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
+	Type   LogType     `json:"type,omitempty"`
 }
 
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Status == "ERROR" {
-		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		switch res.Type {
+		case LogTypeInfo:
+			logger.Infof("Info Message")
+		case LogTypeWarning:
+			logger.Warnf("Warning Message")
+		default:
+			logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		}
 	}
 	WriteJSON(w, res)
 }
