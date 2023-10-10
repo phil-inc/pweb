@@ -191,12 +191,17 @@ type APIResponse struct {
 	Error  string      `json:"error,omitempty"`
 	Status string      `json:"status,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
+	Type   string      `json:"type,omitempty"`
 }
 
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
-	if res.Status == "ERROR" {
+	if res.Type == "ERROR" {
 		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+	} else if res.Type == "WARN" {
+		logger.Warnf("[API][PATH: %s]:: Error handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+	} else {
+		logger.Warnf("[API][PATH: %s]:: Error handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
@@ -238,9 +243,19 @@ func StringErrorResponse(err string) APIResponse {
 	return APIResponse{Error: err, Status: "ERROR", Data: nil}
 }
 
-// ErrorResponse constructs error response from the API
+// ErrorResponse constructs error response from the API with error level log
 func ErrorResponse(err error) APIResponse {
-	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil}
+	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: "ERROR"}
+}
+
+// ErrorInfoResponse constructs error response from the API with info level log
+func ErrorInfoResponse(err error) APIResponse {
+	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: "INFO"}
+}
+
+// ErrorWarnResponse constructs error response from the API with warn level log
+func ErrorWarnResponse(err error) APIResponse {
+	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: "WARN"}
 }
 
 // ImageResponse constructs an image response from a content type and image data.
