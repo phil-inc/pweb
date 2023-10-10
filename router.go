@@ -186,19 +186,27 @@ func (res CSVResponse) Write(w http.ResponseWriter, r *http.Request) {
 	w.Write(res.CSV)
 }
 
+type LogType string
+
+const (
+	LogTypeInfo  LogType = "INFO"
+	LogTypeWarn  LogType = "WARN"
+	LogTypeError LogType = "ERROR"
+)
+
 // APIResponse response data representation for API
 type APIResponse struct {
 	Error  string      `json:"error,omitempty"`
 	Status string      `json:"status,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
-	Type   string      `json:"type,omitempty"`
+	Type   LogType     `json:"type,omitempty"`
 }
 
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
-	if res.Type == "ERROR" {
+	if res.Type == LogTypeError {
 		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
-	} else if res.Type == "WARN" {
+	} else if res.Type == LogTypeWarn {
 		logger.Warnf("[API][PATH: %s]:: Error handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	} else {
 		logger.Warnf("[API][PATH: %s]:: Error handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
@@ -245,17 +253,17 @@ func StringErrorResponse(err string) APIResponse {
 
 // ErrorResponse constructs error response from the API with error level log
 func ErrorResponse(err error) APIResponse {
-	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: "ERROR"}
+	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeError}
 }
 
 // ErrorInfoResponse constructs error response from the API with info level log
 func ErrorInfoResponse(err error) APIResponse {
-	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: "INFO"}
+	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeInfo}
 }
 
 // ErrorWarnResponse constructs error response from the API with warn level log
 func ErrorWarnResponse(err error) APIResponse {
-	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: "WARN"}
+	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeWarn}
 }
 
 // ImageResponse constructs an image response from a content type and image data.
