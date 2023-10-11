@@ -207,9 +207,9 @@ func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	if res.Type == LogTypeError {
 		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	} else if res.Type == LogTypeWarn {
-		logger.Warnf("[API][PATH: %s]:: Error handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Warnf("[API][PATH: %s]:: Warning handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	} else {
-		logger.Warnf("[API][PATH: %s]:: Error handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Warnf("[API][PATH: %s]:: Info handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
@@ -257,12 +257,12 @@ func ErrorResponse(err error) APIResponse {
 }
 
 // ErrorInfoResponse constructs error response from the API with info level log
-func ErrorInfoResponse(err error) APIResponse {
+func InfoResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeInfo}
 }
 
 // ErrorWarnResponse constructs error response from the API with warn level log
-func ErrorWarnResponse(err error) APIResponse {
+func WarnResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeWarn}
 }
 
