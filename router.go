@@ -209,7 +209,7 @@ func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
 	} else if res.Type == LogTypeWarn {
 		logger.Warnf("[API][PATH: %s]:: Warning handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	} else {
-		logger.Warnf("[API][PATH: %s]:: Info handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Infof("[API][PATH: %s]:: Info handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
