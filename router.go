@@ -256,12 +256,12 @@ func ErrorResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeError}
 }
 
-// ErrorInfoResponse constructs error response from the API with info level log
+// InfoResponse constructs error response from the API with info level log
 func InfoResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeInfo}
 }
 
-// ErrorWarnResponse constructs error response from the API with warn level log
+// WarnResponse constructs error response from the API with warn level log
 func WarnResponse(err error) APIResponse {
 	return APIResponse{Error: err.Error(), Status: "ERROR", Data: nil, Type: LogTypeWarn}
 }
