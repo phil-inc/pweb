@@ -204,12 +204,12 @@ type APIResponse struct {
 
 // Write - Reponse interface implementation
 func (res APIResponse) Write(w http.ResponseWriter, r *http.Request) {
-	if res.Type == LogTypeError {
-		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+	if res.Type == LogTypeInfo {
+		logger.Infof("[API][PATH: %s]:: Info handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	} else if res.Type == LogTypeWarn {
 		logger.Warnf("[API][PATH: %s]:: Warning handling request. WARN: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	} else {
-		logger.Infof("[API][PATH: %s]:: Info handling request. INFO: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
+		logger.Errorf("[API][PATH: %s]:: Error handling request. ERROR: %s. User agent: %s", r.RequestURI, res.Error, r.Header.Get("User-Agent"))
 	}
 	WriteJSON(w, res)
 }
