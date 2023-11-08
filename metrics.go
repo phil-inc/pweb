@@ -47,11 +47,12 @@ var (
 	)
 )
 
-var pconfigCounter = promauto.NewCounter(
+var pconfigCounter = promauto.NewCounterVec(
 	prometheus.CounterOpts{
 		Name: "pconfig_gets_total",
 		Help: "Counts the number of Get requests to pconfig",
 	},
+	[]string{"key"},
 )
 
 func sanitizeURL(r *http.Request) string {
@@ -96,6 +97,6 @@ func logPrometheusMetrics(httpResponse logHTTPResponse, r *http.Request, respDur
 
 }
 
-func logPConfigGet() {
-	pconfigCounter.Inc()
+func logPConfigGet(key string) {
+	pconfigCounter.With(prometheus.Labels{"key": key}).Inc()
 }
