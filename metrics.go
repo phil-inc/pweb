@@ -45,14 +45,13 @@ var (
 		},
 		[]string{"endpoint", "method", "status"},
 	)
-)
-
-var pconfigCounter = promauto.NewCounterVec(
-	prometheus.CounterOpts{
-		Name: "pconfig_gets_total",
-		Help: "Counts the number of Get requests to pconfig",
-	},
-	[]string{"key"},
+	pconfigCounter = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "pconfig_gets_total",
+			Help: "Counts the number of Get requests to pconfig",
+		},
+		[]string{"key"},
+	)
 )
 
 func sanitizeURL(r *http.Request) string {
