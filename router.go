@@ -90,6 +90,7 @@ func (s *PhilRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With, X-App-Source, X-Request-Id, X-User-Id, Strict-Transport-Security, X-Forwarded-For, X-Real-Ip, X-Phil-Canary, X-Phil-Debug, Browser-User-Agent")
 	w.Header().Set("Access-Control-Max-Age", "7200")
+	w.Header().Set("Content-Security-Policy", getContentSecurityPolicy())
 	if req.Method == "OPTIONS" {
 		w.(http.Flusher).Flush()
 	}
@@ -435,4 +436,17 @@ func isPrivateSubnet(ipAddress net.IP) bool {
 		}
 	}
 	return false
+}
+
+func getContentSecurityPolicy() string {
+	policy := `default-src 'self';
+	script-src 'self' https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.js https://cdnjs.cloudflare.com/ajax/libs/ng-csv/0.3.6/ng-csv.min.js https://cdn.polyfill.io/v2/polyfill.min.js https://edge.fullstory.com/s/fs.js;
+	object-src 'self';
+	style-src 'self' https://ajax.googleapis.com https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+	frame-src 'self';
+	img-src *;
+	media-src *;
+	manifest-src 'self';
+	font-src 'self' https://fonts.gstatic.com;`
+	return policy
 }
